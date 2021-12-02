@@ -1,0 +1,83 @@
+assume cs:code,ds:data
+
+
+data segment
+		;0123456789ABCDEF
+	db	'welcome to ma ',0
+	db	'welcome to ma ',0
+	
+
+	dw	0,15,32,2FH
+data ends
+
+stack segment 
+	db	128 dup(0)
+stack ends
+
+code segment
+start:
+	mov ax,stack
+	mov ss,ax
+	mov sp,128
+
+	call init_reg
+
+	call show_option
+
+
+
+	mov ax,4C00H	
+	int 21H
+
+
+;==============================
+show_option:
+	mov bx,3DH
+	mov di,160*10 + 30*2
+	mov cx,2
+showOption:
+	mov si,ds:[bx+0]
+	call show_string
+	add di,160	
+	add bx,2
+	loop showOption
+	ret
+;==============================
+
+show_string:
+	push cx
+	push ds
+	push es
+	push si
+	push di
+
+	mov cx,0
+
+showString:
+	mov cl,ds:[si]
+	jcxz showStringRet
+	mov es:[di],cl
+	add di,2
+	inc si
+	jmp showString
+
+showStringRet:
+	pop di
+	pop si
+	pop es
+	pop ds
+	pop cx
+	ret
+
+;===============================
+init_reg:
+	mov bx,0B800H
+	mov es,bx
+
+	mov bx,data
+	mov ds,bx
+	ret
+	
+code ends
+end  start
+
